@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  A kittens carousel project, need EC2 instance and security group.
+
+Resources:
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: allow https and http
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+
+  MyWebServer:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-08a0d1e16fc3f61ea
+      InstanceType: t2.micro
+      KeyName: "xxxx"
+      SecurityGroupIds: 
+        - !Ref MySecurityGroup
+      Tags: 
+        - Key: Name
+          Value: Andys' kitten
+      UserData: 
+        Fn::Base64: 
+          |
+            #! /bin/bash -x
+            yum update -y
+            yum install httpd -y
+            cd /var/www/html
+            FOLDER="https://raw.githubusercontent.com/apr7778/clarusway/main/AWS/projects/101-kittens-carousel-static-website-ec2/static-web/"
+            wget ${FOLDER}index.html
+            wget ${FOLDER}cat0.jpg
+            wget ${FOLDER}cat1.jpg
+            wget ${FOLDER}cat2.jpg
+            systemctl start httpd
+            systemctl enable httpd
+
+
+
